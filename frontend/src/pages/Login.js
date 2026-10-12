@@ -15,9 +15,7 @@ function Login() {
     return (
         <main className="login-page">
             <section className="login-card" aria-labelledby="login-heading">
-                <div className="login-brand-mark" aria-hidden="true">ADP</div>
-                <p className="login-eyebrow">ANALYTICAL DASHBOARD PLATFORM</p>
-                <h1 id="login-heading">Welcome back</h1>
+                <h1 id="login-heading">Login</h1>
                 <p className="login-description">Sign in with the user ID and password issued for your account.</p>
 
                 <form onSubmit={handleSubmit}>
@@ -61,7 +59,7 @@ function Login() {
                     </label>
 
                     <Link className="login-forgot" to="/forget-password">Forgot password?</Link>
-                    <button className="login-submit" type="submit">Sign in</button>
+                    <button className="login-submit" type="submit">Login</button>
                     {notice && <p className="login-notice" role="status">{notice}</p>}
                 </form>
 
