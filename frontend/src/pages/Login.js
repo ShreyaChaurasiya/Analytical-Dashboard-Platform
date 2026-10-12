@@ -72,6 +72,7 @@ function Login() {
     return (
         <main className="login-page">
             <section className="login-card">
+                
                 <h1>Log in</h1>
                 <form onSubmit={handleSubmit} autoComplete="off">
                     <label>
@@ -139,6 +140,13 @@ function Login() {
                 <p className="login-note">
                     By continuing, you agree to the Privacy Policy & Cookie Policy.
                 </p>
+
+                <div className="login-register-wrapper">
+                    <p className="login-register">
+                        New user?{" "}
+                        <Link to="/registration">Create Account</Link>
+                    </p>
+                </div>
             </section>
         </main>
     );

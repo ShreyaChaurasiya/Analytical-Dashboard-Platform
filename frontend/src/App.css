@@ -187,6 +187,40 @@
     padding: 0;
 }
 
+.back-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #1d4ed8;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.login-card .login-register {
+    display: block;
+    width: 100%;
+    margin: 20px 0 0;
+    text-align: center !important;
+    font-size: 14px;
+    color: #555;
+}
+
+.login-card .login-register a {
+    display: inline-block;
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 4px;
+}
+
+.login-card .login-register a:hover {
+    text-decoration: underline;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

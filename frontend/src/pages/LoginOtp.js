@@ -52,6 +52,14 @@ function LoginOtp() {
     return (
         <main className="login-page">
             <section className="login-card">
+                <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="back-button"
+                    aria-label="Go back"
+                >
+                ←
+                </button>
                 <h1>Enter OTP</h1>
                 <form onSubmit={handleOtp}>
                     <p className="login-signup">We sent a code to {email}.</p>

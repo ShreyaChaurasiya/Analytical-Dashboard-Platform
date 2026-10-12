@@ -99,6 +99,14 @@ function ForgetPassword() {
     return (
         <main className="login-page">
             <section className="login-card">
+                <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="back-button"
+                    aria-label="Go back"
+                >
+                ←
+                </button>
                 <h1>Forget Password</h1>
                 {step === "email" && (
                     <form onSubmit={handleEmail}>
