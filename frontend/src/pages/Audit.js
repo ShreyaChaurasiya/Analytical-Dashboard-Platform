@@ -1,1 +1,1 @@
-// Administrator audit review. Empty for now.
+// Audit review page. Empty for now.
