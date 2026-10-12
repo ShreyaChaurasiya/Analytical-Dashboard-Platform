@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 const initialForm = {
     accountType: "individual",
@@ -15,10 +15,17 @@ const initialForm = {
 };
 
 function Registration() {
+    const navigate = useNavigate();
     const [form, setForm] = useState(initialForm);
     const [error, setError] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!submitted) return undefined;
+        const redirectTimer = window.setTimeout(() => navigate("/login", { replace: true }), 2500);
+        return () => window.clearTimeout(redirectTimer);
+    }, [submitted, navigate]);
 
     function updateField(event) {
         const { name, value } = event.target;
@@ -76,8 +83,8 @@ function Registration() {
                     <div className="registration-success-icon" aria-hidden="true">✓</div>
                     <p className="login-eyebrow">REGISTRATION RECEIVED</p>
                     <h1 id="registration-success-heading">Thanks, {form.fullName.trim().split(" ")[0]}.</h1>
-                    <p className="login-description">Your registration request was submitted. Account sign-in details will be provided separately.</p>
-                    <Link className="registration-button registration-button-link" to="/login">Continue to sign in</Link>
+                    <p className="login-description" role="status">Your registration request was submitted. Taking you to login…</p>
+                    <Link className="registration-button registration-button-link" to="/login">Go to login now</Link>
                 </section>
             </main>
         );
@@ -87,10 +94,9 @@ function Registration() {
         <main className="registration-page">
             <section className="registration-card" aria-labelledby="registration-heading">
                 <header className="registration-header">
-                    <div className="login-brand-mark" aria-hidden="true">ADP</div>
                     <p className="login-eyebrow">ANALYTICAL DASHBOARD PLATFORM</p>
                     <h1 id="registration-heading">Create your account</h1>
-                    <p className="login-description">Tell us a little about yourself to get started. Fields marked <span aria-hidden="true">*</span> are required.</p>
+                    <p className="login-description"> Fields marked <span aria-hidden="true">*</span> are required.</p>
                 </header>
 
                 <form className="registration-form" onSubmit={handleSubmit}>
