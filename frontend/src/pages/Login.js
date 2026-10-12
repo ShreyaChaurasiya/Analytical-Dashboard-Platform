@@ -66,6 +66,7 @@ function Login() {
                 </form>
 
                 <p className="login-note">Use only credentials issued to you. Never share your password.</p>
+                <p className="login-signup">New to ADP? <Link to="/register">Create an account</Link></p>
             </section>
         </main>
     );
