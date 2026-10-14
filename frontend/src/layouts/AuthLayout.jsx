@@ -6,7 +6,7 @@ function AuthLayout() {
     return (
         <div className="layout">
             <Header variant="auth" />
-            <div className="layout-content"><Outlet /></div>
+            <main id="main-content" className="layout-content"><Outlet /></main>
             <Footer variant="auth" />
         </div>
     );

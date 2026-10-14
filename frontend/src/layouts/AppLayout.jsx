@@ -6,7 +6,7 @@ function AppLayout() {
     return (
         <div className="layout">
             <Header variant="app" />
-            <div className="layout-content"><Outlet /></div>
+            <main id="main-content" className="layout-content"><Outlet /></main>
             <Footer variant="app" />
         </div>
     );
