@@ -1,1 +1,1 @@
-// Administrator user management. Empty for now.
+// User account page. Empty for now.
