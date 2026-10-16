@@ -6,6 +6,9 @@ import Login from "./pages/Login";
 import LoginOtp from "./pages/LoginOtp";
 import ForgetPassword from "./pages/ForgetPassword";
 import Dashboard from "./pages/Dashboard";
+import Upload from "./pages/Upload";
+import Reports from "./pages/Reports";
+import Home from "./pages/Home";
 import "./App.css";
 
 function App() {
@@ -18,7 +21,12 @@ function App() {
         <Route path="/registration" element={<Registration />} />
       </Route>
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/upload" element={<Upload />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/help" element={<section className="info-page"><p className="dashboard-eyebrow">SUPPORT</p><h1>Help</h1><p>To get started, open Dashboard, upload a dataset, or download the CSV template to prepare your data.</p><a href="mailto:support@example.com">Contact support</a></section>} />
+        <Route path="/about" element={<section className="info-page"><p className="dashboard-eyebrow">ABOUT THE PLATFORM</p><h1>Analytical Dashboard Platform</h1><p>A platform from C-DAC, Delhi to help make data analysis and reporting more accessible.</p></section>} />
       </Route>
     </Routes>
   );

@@ -14,17 +14,15 @@ function Footer({ variant }) {
 
                 <nav className="site-footer-column" aria-label="Platform links">
                     <h2>Platform</h2>
-                    <Link to="/">Dashboard</Link>
+                    <Link to="/dashboard">Dashboard</Link>
                     <Link to="/upload">Upload dataset</Link>
                     <Link to="/dashboards">Saved dashboards</Link>
                     <Link to="/reports">Reports</Link>
                 </nav>
 
-                <nav className="site-footer-column" aria-label="Resources and downloads">
+                <nav className="site-footer-column" aria-label="Resources">
                     <h2>Resources</h2>
                     <Link to="/templates">Templates</Link>
-                    <a href="/downloads/dashboard" download>Download dashboard</a>
-                    <a href="/downloads/report" download>Download report</a>
                     <Link to="/documentation">Documentation</Link>
                 </nav>
 
