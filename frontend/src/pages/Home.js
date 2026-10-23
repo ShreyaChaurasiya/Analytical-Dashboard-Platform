@@ -106,7 +106,7 @@ function Home() {
                         <p className="home-hero-description">Prepare a dataset, explore what it shows, and present findings with enough context for others to understand.</p>
                         <div className="home-hero-actions">
                             <Link className="home-button home-button-primary" to="/login">Login</Link>
-                            <Link className="home-button home-button-secondary" to="/registration">Get started</Link>
+                            <Link className="home-button home-button-secondary" to="/register">Get started</Link>
                         </div>
                         <p className="home-credential-note"><strong>Have an issued user ID?</strong> Sign in with the credentials provided for your account.</p>
                     </div>
