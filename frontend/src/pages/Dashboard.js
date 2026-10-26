@@ -1,66 +1,91 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-const metrics = [
-    { label: "Total datasets", value: "0", note: "Upload your first dataset", tone: "green" },
-    { label: "Data quality score", value: "-", note: "Available after upload", tone: "blue" },
-    { label: "Reports generated", value: "0", note: "Available after analysis", tone: "violet" },
-    { label: "Pending reviews", value: "0", note: "Nothing needs attention", tone: "amber" },
-];
+function getSavedDataset() {
+    try {
+        const value = JSON.parse(window.localStorage.getItem("adp-uploaded-dataset") || "null");
+        return value && typeof value === "object" ? value : null;
+    } catch {
+        return null;
+    }
+}
 
 function Dashboard() {
-    const [isAnalysisRunning, setIsAnalysisRunning] = useState(false);
-    const [analysisProgress, setAnalysisProgress] = useState(0);
+    const [dataset] = useState(getSavedDataset);
+    const [isFileCheckComplete, setIsFileCheckComplete] = useState(false);
     const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true);
     const [isDownloadOpen, setIsDownloadOpen] = useState(false);
 
-    useEffect(() => {
-        if (!isAnalysisRunning) return undefined;
-        const timer = window.setInterval(() => {
-            setAnalysisProgress((current) => {
-                if (current >= 100) {
-                    window.clearInterval(timer);
-                    setIsAnalysisRunning(false);
-                    return 100;
-                }
-                return Math.min(current + 20, 100);
-            });
-        }, 450);
-        return () => window.clearInterval(timer);
-    }, [isAnalysisRunning]);
+    const metrics = useMemo(() => {
+        const cells = dataset ? dataset.rowCount * dataset.columnCount : 0;
+        const completeness = cells ? Math.round(((cells - dataset.missingCells) / cells) * 100) : null;
+        return [
+            { label: "Datasets in this browser", value: dataset ? "1" : "0", note: dataset ? dataset.name : "Upload a CSV or TSV file", tone: "green" },
+            { label: "Data completeness", value: completeness === null ? "—" : `${completeness}%`, note: dataset ? `${dataset.missingCells} blank cells in the file` : "Available after upload", tone: "blue" },
+            { label: "Reports generated", value: "0", note: "No report has been generated", tone: "violet" },
+            { label: "Blank cells", value: dataset ? String(dataset.missingCells) : "—", note: dataset?.missingCells ? "Review before analysis" : "Available after upload", tone: "amber" },
+        ];
+    }, [dataset]);
 
-    const startAnalysis = () => {
-        setAnalysisProgress(0);
-        setIsAnalysisRunning(true);
+    const runFileCheck = () => {
+        if (!dataset) return;
+        setIsFileCheckComplete(true);
     };
+
+    const summaryCsv = [
+        "item,value",
+        `Dataset,${JSON.stringify(dataset?.name || "No dataset uploaded")}`,
+        `Rows,${dataset?.rowCount || 0}`,
+        `Columns,${dataset?.columnCount || 0}`,
+        `Blank cells,${dataset?.missingCells || 0}`,
+        `Column names,${JSON.stringify((dataset?.headers || []).join(" | "))}`,
+    ].join("\n");
 
     return (
         <main className={`workspace-page workspace-page-empty${isWorkspaceOpen ? "" : " workspace-page-collapsed"}`}>
             <aside className="workspace-sidebar" aria-label="Dashboard sections">
-                <div className="workspace-sidebar-header"><button className="workspace-hide-control" type="button" aria-label="Hide workspace" onClick={() => setIsWorkspaceOpen(false)}>☰</button></div>
+                <div className="workspace-sidebar-header"><button className="workspace-hide-control" type="button" aria-label="Hide workspace" aria-expanded={isWorkspaceOpen} onClick={() => setIsWorkspaceOpen(false)}>☰</button></div>
                 <Link className="workspace-nav-link" to="/">Home</Link>
-                <Link className="workspace-nav-link active" to="/dashboard">Overview</Link>
+                <Link className="workspace-nav-link active" to="/dashboard" aria-current="page">Overview</Link>
+                <Link className="workspace-nav-link" to="/#home-topics">Data examples</Link>
                 <Link className="workspace-nav-link" to="/upload">Upload data</Link>
                 <Link className="workspace-nav-link" to="/reports">Reports</Link>
-                <button className="workspace-nav-link" type="button">Data catalogue</button>
-                <button className="workspace-nav-link" type="button">Quality checks</button>
                 <div className="workspace-download-menu">
                     <button className="workspace-nav-link" type="button" aria-expanded={isDownloadOpen} onClick={() => setIsDownloadOpen((open) => !open)}>Downloads</button>
-                    {isDownloadOpen && <div className="workspace-download-dropdown"><a href="data:text/plain;charset=utf-8,No%20report%20has%20been%20generated%20yet." download="analytical-dashboard-report.txt">Download report</a><a href="data:text/csv;charset=utf-8,metric,value%0ATotal%20datasets,0%0AReports%20generated,0%0APending%20reviews,0" download="analytical-dashboard.csv">Download dashboard</a></div>}
+                    {isDownloadOpen && <div className="workspace-download-dropdown">
+                        <a href={`data:text/csv;charset=utf-8,${encodeURIComponent(summaryCsv)}`} download="adp-dashboard-summary.csv" onClick={() => setIsDownloadOpen(false)}>Download summary CSV</a>
+                        <a href={`data:text/plain;charset=utf-8,${encodeURIComponent("No report has been generated yet. The current dashboard provides a local file summary and blank-cell check only.")}`} download="adp-report-status.txt" onClick={() => setIsDownloadOpen(false)}>Download report status</a>
+                    </div>}
                 </div>
                 <div className="workspace-sidebar-divider" />
-                <button className="workspace-nav-link" type="button">Settings</button>
                 <Link className="workspace-nav-link" to="/help">Help centre</Link>
-                <div className="workspace-sidebar-footer"><span className="workspace-nav-label"><strong>Ready for your data</strong><small>Upload a file to begin</small></span></div>
+                <div className="workspace-sidebar-footer"><span className="workspace-nav-label"><strong>{dataset ? "Dataset ready" : "Ready for your data"}</strong><small>{dataset ? dataset.name : "Upload a CSV or TSV file"}</small></span></div>
             </aside>
             {!isWorkspaceOpen && <button className="workspace-show-control" type="button" aria-label="Show workspace" onClick={() => setIsWorkspaceOpen(true)}>☰</button>}
 
             <section className="workspace-main">
-                <div className="workspace-filterbar workspace-filterbar-expanded" aria-label="Dashboard filters"><label><span>Dataset</span><select defaultValue="all-datasets"><option value="all-datasets">All uploaded datasets</option></select></label><label><span>Analysis view</span><select defaultValue="overview"><option value="overview">Overview</option><option>Data quality</option><option>Trends over time</option><option>Distribution</option><option>Relationships</option></select></label><label><span>Time range</span><select defaultValue="all-time"><option value="all-time">All available data</option><option>Last 30 days</option><option>Last 90 days</option><option>Last 12 months</option></select></label><span className="workspace-updated">No dataset selected</span></div>
-                <div className="workspace-topbar"><div><p className="dashboard-eyebrow">ANALYTICAL DASHBOARD</p><h1>Start with your data</h1><p className="workspace-subtitle">Upload any CSV or spreadsheet and we will prepare an analysis-ready dashboard and report.</p></div><div className="workspace-actions"><button className="workspace-analysis-button" type="button" onClick={startAnalysis} disabled={isAnalysisRunning}>{isAnalysisRunning ? "Analysing..." : "Run analysis"}</button><Link className="workspace-primary-button" to="/upload">Upload dataset</Link></div></div>
-                {(isAnalysisRunning || analysisProgress === 100) && <section className={`analysis-progress-card${analysisProgress === 100 ? " analysis-complete" : ""}`} aria-live="polite"><div className="analysis-progress-copy"><div><strong>{analysisProgress === 100 ? "Analysis complete" : "Analysis in progress"}</strong><p>{analysisProgress === 100 ? "Your dashboard is ready for review." : "Preparing quality checks, trends, and report sections."}</p></div></div><div className="analysis-progress-value">{analysisProgress}%</div><div className="analysis-progress-track"><i style={{ width: `${analysisProgress}%` }} /></div></section>}
+                <div className="workspace-filterbar workspace-filterbar-expanded" aria-label="Selected dataset">
+                    <span><strong>Dataset</strong>{dataset ? dataset.name : "No dataset selected"}</span>
+                    <span><strong>Rows</strong>{dataset ? dataset.rowCount.toLocaleString() : "—"}</span>
+                    <span><strong>Columns</strong>{dataset ? dataset.columnCount : "—"}</span>
+                    <span className="workspace-updated">{dataset ? "Saved in this browser" : "Upload a file to begin"}</span>
+                </div>
+
+                <div className="workspace-topbar">
+                    <div><p className="dashboard-eyebrow">ANALYTICAL DASHBOARD</p><h1>{dataset ? dataset.name : "Start with your data"}</h1><p className="workspace-subtitle">{dataset ? "Review the file summary and blank-cell check before analysis." : "Upload a CSV or TSV file to preview its columns and begin a local data check."}</p></div>
+                    <div className="workspace-actions"><button className="workspace-analysis-button" type="button" onClick={runFileCheck} disabled={!dataset}>{isFileCheckComplete ? "File check complete" : "Run file check"}</button><Link className="workspace-primary-button" to="/upload">{dataset ? "Upload another file" : "Upload dataset"}</Link></div>
+                </div>
+
+                {isFileCheckComplete && <section className="analysis-progress-card analysis-complete" aria-live="polite"><div className="analysis-progress-copy"><div><strong>File check complete</strong><p>{dataset.missingCells ? `${dataset.missingCells} blank cells found in the uploaded file.` : "No blank cells were found in the uploaded file."}</p></div></div><div className="analysis-progress-value">Ready</div><div className="analysis-progress-track"><i style={{ width: "100%" }} /></div></section>}
+
                 <section className="metric-grid" aria-label="Workspace summary">{metrics.map((metric) => <article className={`metric-card metric-${metric.tone}`} key={metric.label}><div className="metric-card-head" /><p>{metric.label}</p><strong>{metric.value}</strong><small>{metric.note}</small></article>)}</section>
-                <div className="workspace-content-grid"><article className="dashboard-panel panel-trend empty-panel"><div className="panel-heading"><div><h2>Data activity</h2><p>Your activity trend will appear here.</p></div></div><div className="empty-panel-body"><strong>Upload a dataset to see activity</strong><p>Charts and trends will be generated after your first analysis.</p><Link to="/upload" className="panel-link">Upload dataset</Link></div></article><article className="dashboard-panel panel-sources empty-panel"><div className="panel-heading"><div><h2>Data summary</h2><p>Source and quality insights will appear here.</p></div></div><div className="empty-panel-body"><strong>No data available yet</strong><p>We will identify columns, values, and quality issues automatically.</p></div></article><article className="dashboard-panel panel-activity empty-panel"><div className="panel-heading"><div><h2>Recent activity</h2><p>Your generated dashboards and reports will appear here.</p></div><Link to="/reports" className="panel-link">View reports</Link></div><div className="empty-panel-body"><strong>No reports generated</strong><p>Run analysis after uploading a dataset to create your first report.</p></div></article></div>
+
+                <div className="workspace-content-grid">
+                    <article className="dashboard-panel panel-trend empty-panel" id="dataset-quality"><div className="panel-heading"><div><h2>Data quality check</h2><p>{dataset ? "Blank-cell scan of the selected file." : "A quick file check appears after upload."}</p></div></div><div className="empty-panel-body"><strong>{dataset ? `${dataset.missingCells} blank cells found` : "No dataset to check"}</strong><p>{dataset ? `${dataset.rowCount.toLocaleString()} rows and ${dataset.columnCount} columns were read. Check blank values before interpreting results.` : "Choose a CSV or TSV file to see its headings and sample rows."}</p><Link to="/upload" className="panel-link">{dataset ? "Check another file" : "Upload dataset"}</Link></div></article>
+                    <article className="dashboard-panel panel-sources empty-panel" id="dataset-summary"><div className="panel-heading"><div><h2>Data summary</h2><p>{dataset ? "Column names found in the first row." : "Your dataset summary will appear here."}</p></div></div><div className="empty-panel-body"><strong>{dataset ? dataset.name : "No data available yet"}</strong><p>{dataset ? (dataset.headers || []).join(" · ") : "Upload a file to identify its columns and row count."}</p></div></article>
+                    <article className="dashboard-panel panel-activity empty-panel"><div className="panel-heading"><div><h2>Recent activity</h2><p>Activity in this browser session.</p></div><Link to="/reports" className="panel-link">View reports</Link></div><div className="empty-panel-body"><strong>{dataset ? "Dataset prepared" : "No dataset prepared"}</strong><p>{dataset ? `${dataset.name} · ${new Date(dataset.uploadedAt).toLocaleString()}` : "Run a file check after uploading a dataset."}</p><Link to="/upload" className="panel-link">Upload dataset</Link></div></article>
+                </div>
+                <p className="workspace-local-note">This starter currently stores the dataset summary in your browser. Server-side storage and statistical analysis require the project API.</p>
             </section>
         </main>
     );
