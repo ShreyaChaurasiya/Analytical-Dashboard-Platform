@@ -1,1 +1,1 @@
-"""JWT user lookup and role checks. Empty for now."""
+"""Session user lookup and access checks. Empty for now."""
